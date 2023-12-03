@@ -14,6 +14,8 @@ func load(file: String) -> [String] {
 
 // MARK: - Part one
 
+let x = ["red": 12, "green": 13, "blue": 14]
+
 func partOne(_ lines: [String]) -> Int {
 	var output = 0
 	
@@ -25,12 +27,8 @@ func partOne(_ lines: [String]) -> Int {
 		let lineComponents = line.components(separatedBy: " ")
 		
 		for (index, el) in lineComponents.enumerated() {
-			if el == "red" {
-				addLine = Int(lineComponents[index - 1])! <= 12
-			} else if el == "green" {
-				addLine = Int(lineComponents[index - 1])! <= 13
-			} else if el == "blue" {
-				addLine = Int(lineComponents[index - 1])! <= 14
+			if let num = x[el] {
+				addLine = Int(lineComponents[index - 1])! <= num
 			}
 			
 			if !addLine { break }
@@ -44,7 +42,16 @@ func partOne(_ lines: [String]) -> Int {
 	return output
 }
 
+let example = """
+Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
+""".components(separatedBy: "\n")
+
 //print(partOne(load(file: "Input")))
+partOne(example)
 
 // MARK: - Part Two
 
