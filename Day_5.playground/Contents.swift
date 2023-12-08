@@ -81,35 +81,16 @@ humidity-to-location map:
 56 93 4
 """.components(separatedBy: "\n\n")
 
-func partTwo(_ input: [String]) -> Int {
-	let seedsRanges = input[0].components(separatedBy: " ").compactMap { Int($0) }
-	var minLocation = Int.max
+func getSeeds(from line: String) -> [[Int]] {
+	var seedsRanges: [[Int]] = []
+	let components = line.components(separatedBy: " ").compactMap { Int($0) }
 	
-	for i in stride(from: 0, to: seedsRanges.count - 1, by: 2) {
-		for seed in seedsRanges[i]..<seedsRanges[i] + seedsRanges[i + 1] {
-			var translatedValue = seed
-			for i in 1...input.count - 1 {
-				let mapLines = input[i].components(separatedBy: "\n")
-				
-				for (i, line) in mapLines.enumerated() where i != 0 {
-					let lineComponents = line.components(separatedBy: " ").compactMap { Int($0) }
-					
-					if lineComponents[1]..<lineComponents[1] + lineComponents[2] ~= translatedValue {
-						let diff = translatedValue - lineComponents[1]
-						translatedValue = lineComponents[0] + diff
-						break
-					}
-				}
-			}
-			
-			minLocation = min(minLocation, translatedValue)
-		}
+	for i in stride(from: 0, to: components.count, by: 2) {
+		seedsRanges.append([components[i], components[i] + components[i + 1] - 1])
 	}
-	
-	return minLocation
+
+	return seedsRanges
 }
 
-// I'm sure it is working with input file but after 30 mins first set of seeds weren't calculated
-// so it should be optimalized somehow
-
-partTwo(example)
+var seedsRanges = getSeeds(from: example[0])
+print(seedsRanges)
