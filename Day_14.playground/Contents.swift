@@ -12,21 +12,140 @@ func load(file: String) -> [String] {
 	return content.components(separatedBy: "\n")
 }
 
-func transpose(lines: [String]) -> [String] {
-	var transposedLines: [String] = []
-	
-	for i in 0..<lines[0].count {
-		var newLine = ""
-		
-		for line in lines {
-			newLine.append(Array(line)[i])
-		}
-		
-		transposedLines.append(newLine)
+func moveNorth(_ input: [String]) -> [String] {
+	var lines: [[String]] = []
+	for line in input {
+		lines.append(line.map { String($0) })
 	}
 	
-	return transposedLines
+	for i in 0..<input[0].count {  // columns
+		for j in 1..<input.count {  // rows
+			if lines[j][i] == "O" {
+				for k in stride(from: j, to: 0, by: -1) {
+					if lines[k - 1][i] == "." {
+						let temp = lines[k - 1][i]
+						lines[k - 1][i] = lines[k][i]
+						lines[k][i] = temp
+					} else {
+						break
+					}
+				}
+			}
+		}
+	}
+	
+	var output: [String] = []
+	for line in lines {
+		output.append(line.joined())
+	}
+	
+	return output
 }
+
+func moveSouth(_ input: [String]) -> [String] {
+	var lines: [[String]] = []
+	for line in input {
+		lines.append(line.map { String($0) })
+	}
+	
+	for i in 0..<input[0].count {  // columns
+		for j in stride(from: input[i].count - 2, through: 0, by: -1) {  // rows
+			if lines[j][i] == "O" {
+				for k in j..<lines[i].count - 1 {
+					if lines[k + 1][i] == "." {
+						let temp = lines[k + 1][i]
+						lines[k + 1][i] = lines[k][i]
+						lines[k][i] = temp
+					} else {
+						break
+					}
+				}
+			}
+		}
+	}
+	
+	var output: [String] = []
+	for line in lines {
+		output.append(line.joined())
+	}
+	
+	return output
+}
+
+func moveWest(_ input: [String]) -> [String] {
+	var lines = input
+	
+	for (i, line) in lines.enumerated() {
+		guard line.contains("O") else { continue }
+		
+		var lineComponents = line.map { String($0) }
+		
+		for j in 1..<lineComponents.count {
+			if lineComponents[j] == "O" {
+				for k in stride(from: j, to: 0, by: -1) {
+					if lineComponents[k - 1] == "." {
+						let temp = lineComponents[k]
+						lineComponents[k] = lineComponents[k - 1]
+						lineComponents[k - 1] = temp
+					} else {
+						break
+					}
+				}
+			}
+		}
+		
+		lines[i] = lineComponents.joined()
+	}
+	
+	return lines
+}
+
+func moveEast(_ input: [String]) -> [String] {
+	var lines = input
+	
+	for (i, line) in lines.enumerated() {
+		guard line.contains("O") else { continue }
+		
+		var lineComponents = line.map { String($0) }
+		for j in stride(from: lineComponents.count - 2, through: 0, by: -1) {
+			if lineComponents[j] == "O" {
+				for k in j..<lineComponents.count - 1 {
+					if lineComponents[k + 1] == "." {
+						let temp = lineComponents[k]
+						lineComponents[k] = lineComponents[k + 1]
+						lineComponents[k + 1] = temp
+					} else {
+						break
+					}
+				}
+			}
+		}
+		
+		lines[i] = lineComponents.joined()
+	}
+	
+	return lines
+}
+
+// MARK: - Part one
+
+func partOne(_ input: [String]) -> Int {
+	let lines = moveNorth(input)
+	var output = 0
+	for (i, line) in lines.enumerated() {
+		guard line.contains("O") else { continue }
+
+		for char in line {
+			if char == "O" {
+				output += lines.count - i
+			}
+		}
+	}
+	
+	return output
+}
+
+//partOne(load(file: "Input"))
 
 let example = """
 O....#....
@@ -41,69 +160,48 @@ O.#..O.#.#
 #OO..#....
 """.components(separatedBy: "\n")
 
-var transposedInput = transpose(lines: load(file: "Input"))
-var input = transposedInput
+let input = example
+//let input = load(file: "Input")
 
-for (i, line) in input.enumerated() {
-	guard line.contains("O") else { continue }
+func makeCycle(_ arg: [String]) -> [String] {
+	var l = moveNorth(arg)
+	l = moveWest(l)
+	l = moveSouth(l)
+	l = moveEast(l)
 	
-	var lineComponents = line.map { String($0) }
+	return l
+}
+
+var lines: [String] = input
+
+var result: [String] = []
+var hashes: [Int] = []
+for i in 0... {
+	var hasher = Hasher()
+	lines = makeCycle(lines)
+	hasher.combine(lines)
+	let hash = hasher.finalize()
 	
-	for x in 1..<lineComponents.count {
-		if lineComponents[x] == "O" {
-			for i in stride(from: x, to: 0, by: -1) {
-				if lineComponents[i - 1] == "." {
-					let temp = lineComponents[i]
-					lineComponents[i] = lineComponents[i - 1]
-					lineComponents[i - 1] = temp
-				} else {
-					break
-				}
-			}
-		}
+	if hashes.contains(where: { $0 == hash }) {
+		print(i + 1)
+		result = lines
+		break
 	}
 	
-	input[i] = lineComponents.joined()
+	hashes.append(hash)
 }
+
+//result = makeCycle(result)
 
 var output = 0
-for line in input {
+for (i, line) in result.enumerated() {
 	guard line.contains("O") else { continue }
-	
-	for (i, char) in line.enumerated() {
+
+	for char in line {
 		if char == "O" {
-			output += transposedInput.count - i
+			output += result.count - i
 		}
 	}
 }
+
 print(output)
-
-// 108935
-
-//let x = 10
-//let y = [[9], [1, 0], [2, 2, 1]]
-//let z = [[9], [1, 0], [2, 2, 1]]
-//
-//var hasher1 = Hasher()
-//hasher1.combine(x)
-//let hash1 = hasher1.finalize()
-//
-//var hasher2 = Hasher()
-//hasher2.combine(y)
-//let hash2 = hasher2.finalize()
-//
-//var hasher3 = Hasher()
-//hasher3.combine(z)
-//let hash3 = hasher3.finalize()
-//
-//
-//print(hash1)
-//print(hash2)
-//print(hash3)
-
-
-// start brute forcing
-// save hash after every cycle
-// if hash occured before cycle detected
-// add i * loop to cycle counter
-// calculate remaining cycles
