@@ -147,21 +147,7 @@ func partOne(_ input: [String]) -> Int {
 
 //partOne(load(file: "Input"))
 
-let example = """
-O....#....
-O.OO#....#
-.....##...
-OO.#O....O
-.O.....O#.
-O.#..O.#.#
-..O..#O..O
-.......O..
-#....###..
-#OO..#....
-""".components(separatedBy: "\n")
-
-let input = example
-//let input = load(file: "Input")
+// MARK: - Part two
 
 func makeCycle(_ arg: [String]) -> [String] {
 	var l = moveNorth(arg)
@@ -172,36 +158,52 @@ func makeCycle(_ arg: [String]) -> [String] {
 	return l
 }
 
-var lines: [String] = input
-
-var result: [String] = []
-var hashes: [Int] = []
-for i in 0... {
-	var hasher = Hasher()
-	lines = makeCycle(lines)
-	hasher.combine(lines)
-	let hash = hasher.finalize()
-	
-	if hashes.contains(where: { $0 == hash }) {
-		print(i + 1)
-		result = lines
-		break
-	}
-	
-	hashes.append(hash)
-}
-
-//result = makeCycle(result)
-
-var output = 0
-for (i, line) in result.enumerated() {
-	guard line.contains("O") else { continue }
-
-	for char in line {
-		if char == "O" {
-			output += result.count - i
+func calculateResult(_ lines: [String]) -> Int {
+	var output = 0
+	for (i, line) in lines.enumerated() {
+		guard line.contains("O") else { continue }
+		
+		for char in line {
+			if char == "O" {
+				output += lines.count - i
+			}
 		}
 	}
+	
+	return output
 }
 
-print(output)
+func partTwo(_ input: [String]) -> Int {
+	var lines = input
+	// get cycle len
+	var hashes: [Int] = []
+	var cycleLen = 0
+	var cycleStart = 0
+	for i in 0... {
+		var hasher = Hasher()
+		let temp = makeCycle(lines)
+		
+		hasher.combine(temp)
+		let hash = hasher.finalize()
+		
+		if hashes.contains(where: { $0 == hash }) {
+			cycleStart = hashes.firstIndex(of: hash)!
+			cycleLen = i - hashes.firstIndex(of: hash)!
+			break
+		}
+		
+		lines = temp
+		hashes.append(hash)
+	}
+	
+	let x = (1000000000 - cycleStart) / cycleLen
+	let missingCycles = 1000000000 - cycleStart - x * cycleLen
+	
+	for i in 0..<missingCycles {
+		lines = makeCycle(lines)
+	}
+	
+	return calculateResult(lines)
+}
+
+//partTwo(load(file: "Input"))
