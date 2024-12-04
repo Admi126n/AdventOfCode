@@ -31,3 +31,33 @@ func partOne(_ input: String) -> Int {
 
 //let input = load(file: "Input").replacingOccurrences(of: "\n", with: "")
 //let result = partOne(input)
+
+// MARK: - Part two
+
+func partTwo(_ input: String) -> Int {
+	var output = 0
+
+	let ranges = input.ranges(of: /mul\(\d{,3},\d{,3}\)|do\(\)|don't\(\)/)
+
+	var doMul = true
+	for range in ranges {
+		switch input[range] {
+		case "do()":
+			doMul = true
+		case "don't()":
+			doMul = false
+		default:
+			guard doMul else { continue }
+			
+			var mul = String(input[range]).replacingOccurrences(of: "mul(", with: "").replacingOccurrences(of: ")", with: "")
+			let numbers = mul.split(separator: ",")
+			
+			output += Int(numbers.first!)! * Int(numbers.last!)!
+		}
+	}
+
+	return output
+}
+
+//let input = load(file: "Input").replacingOccurrences(of: "\n", with: "")
+//let result = partTwo(input)
