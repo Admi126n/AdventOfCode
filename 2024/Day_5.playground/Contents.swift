@@ -90,7 +90,6 @@ func partTwo(rules: [[Int]], updates: [[Int]]) -> Int {
 					if !rules.contains([mutableUpdate[i], mutableUpdate[j]]) {
 						(mutableUpdate[i], mutableUpdate[j]) = (mutableUpdate[j], mutableUpdate[i])
 						isCorrect = false
-						break outer
 					}
 				}
 			}
